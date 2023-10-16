@@ -1,7 +1,5 @@
 library dio_net_work;
-
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'package:dio_net_work/app_download_dialog.dart';
+export 'package:dio_net_work/app_download_utils.dart';
+export 'package:dio_net_work/http_utils.dart';
+export 'net_ext_utils.dart';
