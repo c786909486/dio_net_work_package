@@ -111,20 +111,24 @@ class HttpGo {
     }
     _initDio();
 
-    (dio?.httpClientAdapter as IOHttpClientAdapter).createHttpClient = (){
-      HttpClient client = HttpClient();
-      client.findProxy = (url) {
-        return host.isNotEmpty ? "PROXY ${host}:${port.toString()}" : "";
-      };
-
-      if (ignoreCer) {
-        client.badCertificateCallback =
-            (X509Certificate cert, String host, int port) {
-          return true;
+    dio?.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        // Config the client.
+        client.findProxy = (uri) {
+          return host.isNotEmpty ? "PROXY ${host}:${port.toString()}" : "";
         };
-      }
-      return client;
-    };
+        if (ignoreCer) {
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) {
+            return true;
+          };
+        }
+        // You can also create a new HttpClient for Dio instead of returning,
+        // but a client must being returned here.
+        return client;
+      },
+    );
 
   }
 
@@ -135,16 +139,21 @@ class HttpGo {
     _initDio();
 
     if(ignoreCer){
-      (dio?.httpClientAdapter as IOHttpClientAdapter).createHttpClient = (){
-        HttpClient client = HttpClient();
-        if (ignoreCer) {
-          client.badCertificateCallback =
-              (X509Certificate cert, String host, int port) {
-            return true;
-          };
-        }
-        return client;
-      };
+      dio?.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = HttpClient();
+          // Config the client.
+          if (ignoreCer) {
+            client.badCertificateCallback =
+                (X509Certificate cert, String host, int port) {
+              return true;
+            };
+          }
+          // You can also create a new HttpClient for Dio instead of returning,
+          // but a client must being returned here.
+          return client;
+        },
+      );
     }
   }
 
