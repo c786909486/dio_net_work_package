@@ -110,10 +110,11 @@ class HttpGo {
       return;
     }
     _initDio();
-    (dio?.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
-        (client) {
+
+    (dio?.httpClientAdapter as IOHttpClientAdapter).createHttpClient = (){
+      HttpClient client = HttpClient();
       client.findProxy = (url) {
-        return host.isNotEmpty ? "PROXY ${host}:${port.toString()}" : "DIRECT";
+        return host.isNotEmpty ? "PROXY ${host}:${port.toString()}" : "";
       };
 
       if (ignoreCer) {
@@ -122,8 +123,66 @@ class HttpGo {
           return true;
         };
       }
+      return client;
     };
+
   }
+
+  void closeProxy({ bool ignoreCer = true}){
+    if (kIsWeb) {
+      return;
+    }
+    _initDio();
+
+    if(ignoreCer){
+      (dio?.httpClientAdapter as IOHttpClientAdapter).createHttpClient = (){
+        HttpClient client = HttpClient();
+        if (ignoreCer) {
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) {
+            return true;
+          };
+        }
+        return client;
+      };
+    }
+  }
+
+
+  // void setNetProxy({String host = "", int port = 0, bool ignoreCer = true}) {
+  //   if (kIsWeb) {
+  //     return;
+  //   }
+  //   _initDio();
+  //
+  //   (dio?.httpClientAdapter as IOHttpClientAdapter).createHttpClient = (){
+  //     HttpClient client = HttpClient();
+  //     if(host.isNotEmpty){
+  //       client.findProxy = (url){
+  //         return HttpClient.findProxyFromEnvironment(url,environment: {"http_proxy":"http://${host}:${port}","https_proxy":"https://${host}:${port}"});
+  //       };
+  //     }else{
+  //       client.findProxy = (url){
+  //         return HttpClient.findProxyFromEnvironment(url,environment: {"no_proxy":""});
+  //       };
+  //     }
+  //     return client;
+  //   };
+  //
+  //   (dio?.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
+  //       (client) {
+  //     client.findProxy = (url) {
+  //       return host.isNotEmpty ? "PROXY ${host}:${port.toString()}" : "";
+  //     };
+  //
+  //     if (ignoreCer) {
+  //       client.badCertificateCallback =
+  //           (X509Certificate cert, String host, int port) {
+  //         return true;
+  //       };
+  //     }
+  //   };
+  // }
 
 /*
 
