@@ -12,9 +12,9 @@ dependencies:
     sdk: flutter
 
   # dio网络请求框架
-  dio: ^5.1.1
+  dio: ^4.0.0
   # dio cookie管理
-  dio_cookie_manager: ^2.1.4
+  dio_cookie_manager: ^2.0.0
 
   # 本地路径管理
   path_provider: ^2.0.14

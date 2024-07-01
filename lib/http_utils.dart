@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:dio_net_work/net_ext_utils.dart';
 import 'package:flutter/foundation.dart';
@@ -48,11 +48,11 @@ class HttpGo {
 
       //连接服务器超时时间，单位是毫秒.
 
-      connectTimeout: Duration(milliseconds: 50000),
+      connectTimeout: 50000,
 
       //响应流上前后两次接受到数据的间隔，单位为毫秒。
 
-      receiveTimeout: Duration(milliseconds: 100000),
+      receiveTimeout: 100000,
 
       //请求的Content-Type，默认值是[ContentType.json]. 也可以用ContentType.parse("application/x-www-form-urlencoded")
 
@@ -112,8 +112,7 @@ class HttpGo {
     }
     _initDio();
 
-    (dio?.httpClientAdapter as IOHttpClientAdapter).createHttpClient = (){
-      HttpClient client = HttpClient();
+    (dio?.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (HttpClient client){
       client.findProxy = (url) {
         return host.isNotEmpty ? "PROXY ${host}:${port.toString()}" : "";
       };
@@ -136,8 +135,7 @@ class HttpGo {
     _initDio();
 
     if(ignoreCer){
-      (dio?.httpClientAdapter as IOHttpClientAdapter).createHttpClient = (){
-        HttpClient client = HttpClient();
+      (dio?.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (HttpClient client){
         if (ignoreCer) {
           client.badCertificateCallback =
               (X509Certificate cert, String host, int port) {
@@ -341,18 +339,18 @@ class HttpGo {
   * error统一处理*/
 
   static String formatError(e) {
-    if (e is DioException) {
-      if (e.type == DioExceptionType.connectionTimeout) {
+    if (e is DioError) {
+      if (e.type == DioErrorType.connectTimeout) {
         return "连接超时";
-      } else if (e.type == DioExceptionType.sendTimeout) {
+      } else if (e.type == DioErrorType.sendTimeout) {
         return "请求超时";
-      } else if (e.type == DioExceptionType.receiveTimeout) {
+      } else if (e.type == DioErrorType.receiveTimeout) {
         return "响应超时";
-      } else if (e.type == DioExceptionType.badResponse) {
+      } else if (e.type == DioErrorType.response) {
         return checkError(e.message??"");
-      } else if (e.type == DioExceptionType.cancel) {
+      } else if (e.type == DioErrorType.cancel) {
         return "";
-      } else if (e.type == DioExceptionType.unknown) {
+      } else if (e.type == DioErrorType.other) {
         return e.message??"";
       } else {
         return "未知错误";
