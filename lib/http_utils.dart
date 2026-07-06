@@ -110,7 +110,7 @@ class HttpGo {
     if (kIsWeb) {
       return;
     }
-    _initDio();
+    // _initDio();
 
     (dio?.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (HttpClient client){
       client.findProxy = (url) {
@@ -128,11 +128,11 @@ class HttpGo {
 
   }
 
-  void closeProxy({ bool ignoreCer = true}){
+  void closeProxy({ bool ignoreCer = false}){
     if (kIsWeb) {
       return;
     }
-    _initDio();
+    // _initDio();
 
     if(ignoreCer){
       (dio?.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (HttpClient client){
@@ -325,9 +325,13 @@ class HttpGo {
   * 下载文件*/
 
   void downloadFile(urlPath, savePath, onReceiveProgress,
-      onRequestFail errorListener) async {
+      onRequestFail errorListener,{bool useNewDio = true}) async {
     try {
-      Response response = await Dio()
+      Dio dioItem = dio!;
+      if(useNewDio){
+        dioItem = Dio();
+      }
+      Response response = await dioItem
           .download(urlPath, savePath, onReceiveProgress: onReceiveProgress);
     } catch (e) {
       errorListener(formatError(e));
